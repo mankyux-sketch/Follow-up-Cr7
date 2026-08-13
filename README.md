@@ -1,17 +1,10 @@
-# Follow Up CR-7 V2
+# Follow Up CR-7 V3
 
-Aplikasi statis untuk follow up saran perbaikan setelah servis.
+Perbaikan utama:
+- Upload XLSX dibaca langsung di browser tanpa library CDN.
+- Sudah disesuaikan dengan header file CR-7 TOFIK.xlsx.
+- Mendukung .xlsx dan .csv.
+- Pesan error lebih spesifik.
+- Semua fitur V2 tetap ada: Dashboard, Upload/Hapus per batch, Follow Up WA, multi-template WA, filter, dan cek duplikat.
 
-Fitur:
-- Dashboard ringkasan CR-7
-- Upload Excel / CSV
-- Hapus data per batch & tanggal upload
-- Filter SA, Category, Status FU, tanggal upload
-- Follow Up WhatsApp langsung
-- Banyak template WhatsApp, bisa tambah/edit/hapus
-- Variabel template otomatis
-- Cek duplikat saat upload
-- Penyimpanan localStorage browser
-- Siap deploy di Vercel
-
-Catatan: data tersimpan di browser/perangkat yang digunakan. Jika ingin sinkron antar perangkat/user, versi berikutnya perlu database/backend.
+Catatan: format .xls lama tidak didukung pada mode offline. Simpan sebagai .xlsx terlebih dahulu.

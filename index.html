@@ -4,8 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Follow Up CR-7</title>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <style>
+<style>
     :root{
       --bg:#f5f7fb; --card:#fff; --text:#172033; --muted:#687386;
       --nav:#13243c; --nav2:#1d3557; --line:#e6eaf0;
@@ -101,10 +100,10 @@
 
     <section id="upload" class="page">
       <div class="title"><div><h2>Upload / Hapus Data</h2><div class="muted">Upload Excel CR-7 dan kelola data berdasarkan tanggal upload</div></div></div>
-      <div class="notice">Format Excel fleksibel. Sistem mencoba membaca kolom seperti Category, Service Advisor/SA, Police No/Plat, No Rangka/VIN, Customer, Telephone, Detail Job/Saran Perbaikan, Estimasi/Sub Total, dan Status Booking. Data disimpan di browser perangkat ini.</div>
+      <div class="notice">Format Excel fleksibel dan dibaca langsung di browser (tanpa CDN). Sistem mencoba membaca kolom seperti Category, Service Advisor/SA, Police No/Plat, No Rangka/VIN, Customer, Telephone, Detail Job/Saran Perbaikan, Estimasi/Sub Total, dan Status Booking. Data disimpan di browser perangkat ini.</div>
       <div class="input-card">
         <div class="formgrid">
-          <div><label>Pilih file Excel<input id="excelFile" type="file" accept=".xlsx,.xls,.csv" /></label></div>
+          <div><label>Pilih file Excel<input id="excelFile" type="file" accept=".xlsx,.csv" /></label></div>
           <div><label>Tanggal Upload<input id="uploadDate" type="date" /></label></div>
           <div><label>Nama Batch (opsional)<input id="batchName" placeholder="Contoh: CR-7 Agustus Minggu 2" /></label></div>
           <div style="display:flex;align-items:end"><button class="btn primary" onclick="handleUpload()" style="width:100%">Upload Data</button></div>
@@ -274,12 +273,137 @@ function editFollowup(id){
   saveRows(); refreshAll();
 }
 
+
+function colIndexFromRef(ref){
+  const m=String(ref||'').match(/[A-Z]+/i); if(!m)return 0;
+  let n=0; for(const ch of m[0].toUpperCase()) n=n*26+(ch.charCodeAt(0)-64);
+  return n-1;
+}
+async function unzipXlsx(arrayBuffer){
+  const u8=new Uint8Array(arrayBuffer), dv=new DataView(arrayBuffer);
+  let eocd=-1;
+  for(let i=u8.length-22;i>=Math.max(0,u8.length-65557);i--){
+    if(dv.getUint32(i,true)===0x06054b50){eocd=i;break}
+  }
+  if(eocd<0) throw new Error('Struktur ZIP/XLSX tidak ditemukan');
+  const total=dv.getUint16(eocd+10,true), cdOffset=dv.getUint32(eocd+16,true);
+  let p=cdOffset; const entries={}; const decoder=new TextDecoder();
+  for(let i=0;i<total;i++){
+    if(dv.getUint32(p,true)!==0x02014b50) throw new Error('Central directory XLSX rusak');
+    const method=dv.getUint16(p+10,true), csize=dv.getUint32(p+20,true);
+    const nlen=dv.getUint16(p+28,true), xlen=dv.getUint16(p+30,true), clen=dv.getUint16(p+32,true);
+    const local=dv.getUint32(p+42,true);
+    const name=decoder.decode(u8.slice(p+46,p+46+nlen));
+    if(dv.getUint32(local,true)!==0x04034b50) throw new Error('Local file XLSX rusak');
+    const ln=dv.getUint16(local+26,true), lx=dv.getUint16(local+28,true);
+    const dataStart=local+30+ln+lx, comp=u8.slice(dataStart,dataStart+csize);
+    entries[name]={method,comp};
+    p+=46+nlen+xlen+clen;
+  }
+  async function text(name){
+    const e=entries[name]; if(!e) return '';
+    let bytes;
+    if(e.method===0) bytes=e.comp;
+    else if(e.method===8){
+      if(typeof DecompressionStream==='undefined') throw new Error('Browser ini belum mendukung pembacaan XLSX offline');
+      const ds=new DecompressionStream('deflate-raw');
+      const ab=await new Response(new Blob([e.comp]).stream().pipeThrough(ds)).arrayBuffer();
+      bytes=new Uint8Array(ab);
+    } else throw new Error('Metode kompresi XLSX tidak didukung: '+e.method);
+    return decoder.decode(bytes);
+  }
+  return {text,entries};
+}
+function parseXml(s){
+  const x=new DOMParser().parseFromString(s,'application/xml');
+  if(x.querySelector('parsererror')) throw new Error('XML di dalam XLSX tidak valid');
+  return x;
+}
+async function parseXlsxOffline(file){
+  const zip=await unzipXlsx(await file.arrayBuffer());
+  let shared=[];
+  const ss=await zip.text('xl/sharedStrings.xml');
+  if(ss){
+    const doc=parseXml(ss);
+    shared=[...doc.getElementsByTagName('si')].map(si=>[...si.getElementsByTagName('t')].map(t=>t.textContent||'').join(''));
+  }
+
+  let sheetPath='xl/worksheets/sheet1.xml';
+  const wbText=await zip.text('xl/workbook.xml');
+  const relText=await zip.text('xl/_rels/workbook.xml.rels');
+  if(wbText && relText){
+    const wb=parseXml(wbText), rel=parseXml(relText);
+    const first=wb.getElementsByTagName('sheet')[0];
+    if(first){
+      const rid=first.getAttribute('r:id') || first.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id');
+      const relation=[...rel.getElementsByTagName('Relationship')].find(r=>r.getAttribute('Id')===rid);
+      if(relation){
+        let target=relation.getAttribute('Target')||'worksheets/sheet1.xml';
+        target=target.replace(/^\/+/,'');
+        sheetPath=target.startsWith('xl/')?target:'xl/'+target.replace(/^\.\//,'');
+      }
+    }
+  }
+
+  const sheetText=await zip.text(sheetPath);
+  if(!sheetText) throw new Error('Sheet pertama tidak ditemukan di XLSX');
+  const doc=parseXml(sheetText);
+  const matrix=[];
+  for(const row of [...doc.getElementsByTagName('row')]){
+    const arr=[];
+    for(const c of [...row.getElementsByTagName('c')]){
+      const idx=colIndexFromRef(c.getAttribute('r'));
+      const type=c.getAttribute('t')||'';
+      let value='';
+      const v=c.getElementsByTagName('v')[0];
+      if(type==='inlineStr'){
+        value=[...c.getElementsByTagName('t')].map(t=>t.textContent||'').join('');
+      }else if(v){
+        const raw=v.textContent||'';
+        if(type==='s') value=shared[Number(raw)] ?? raw;
+        else if(type==='b') value=raw==='1'?'TRUE':'FALSE';
+        else value=raw;
+      }
+      arr[idx]=value;
+    }
+    matrix.push(arr);
+  }
+  if(!matrix.length) return [];
+  const headers=(matrix[0]||[]).map((h,i)=>String(h||'').trim() || `__EMPTY_${i}`);
+  return matrix.slice(1).filter(r=>r.some(v=>String(v??'').trim()!=='')).map(r=>{
+    const o={}; headers.forEach((h,i)=>o[h]=r[i]??''); return o;
+  });
+}
+function parseCsvText(text){
+  const rows=[]; let row=[], cell='', q=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i], nx=text[i+1];
+    if(ch==='"'){
+      if(q && nx==='"'){cell+='"';i++} else q=!q;
+    }else if(ch===',' && !q){row.push(cell);cell=''}
+    else if((ch==='\n'||ch==='\r') && !q){
+      if(ch==='\r' && nx==='\n')i++;
+      row.push(cell);cell=''; if(row.some(v=>v!==''))rows.push(row);row=[];
+    }else cell+=ch;
+  }
+  row.push(cell); if(row.some(v=>v!==''))rows.push(row);
+  if(!rows.length)return[];
+  const headers=rows[0].map((h,i)=>String(h||'').trim()||`__EMPTY_${i}`);
+  return rows.slice(1).map(r=>{const o={};headers.forEach((h,i)=>o[h]=r[i]??'');return o});
+}
+async function readSpreadsheet(file){
+  const ext=(file.name.split('.').pop()||'').toLowerCase();
+  if(ext==='csv') return parseCsvText(await file.text());
+  if(ext==='xlsx') return await parseXlsxOffline(file);
+  if(ext==='xls') throw new Error('Format .xls lama belum didukung offline. Simpan ulang sebagai .xlsx lalu upload kembali.');
+  throw new Error('Format file harus .xlsx atau .csv');
+}
 async function handleUpload(){
   const file=excelFile.files[0]; if(!file){alert('Pilih file Excel terlebih dahulu.');return}
   const date=uploadDate.value || new Date().toISOString().slice(0,10);
   const bname=batchName.value.trim();
   try{
-    const buf=await file.arrayBuffer(), wb=XLSX.read(buf,{type:'array'}), ws=wb.Sheets[wb.SheetNames[0]], raw=XLSX.utils.sheet_to_json(ws,{defval:''});
+    const raw=await readSpreadsheet(file);
     if(!raw.length){alert('Excel tidak berisi data.');return}
     let added=0, duplicate=0;
     raw.forEach(o=>{
@@ -289,14 +413,18 @@ async function handleUpload(){
         category:norm(pick(o,['Category','Kategori'])),
         sa:norm(pick(o,['Service Advisor','SA','Advisor','PIC SA'])),
         plat:norm(pick(o,['Police No','Police_No','Plat','No Polisi','Nopol','Nomor Polisi'])),
-        vin:norm(pick(o,['No Rangka','Rangka','VIN','Chassis No','Chassis'])),
-        customer:norm(pick(o,['Customer','Customer Name','Nama Customer','Nama'])),
-        phone:norm(pick(o,['Telephone','Telephone CP','Phone','No HP','No WA','WA','Handphone'])),
+        vin:norm(pick(o,['No Rangka','Norangka','Rangka','VIN','Chassis No','Chassis'])),
+        customer:norm(pick(o,['Customer','Customer Name','Nama Customer','Nama','Contact person','Contact Person'])),
+        phone:norm(pick(o,['Telephone CP','Telephone','Phone','No HP','No WA','WA','Handphone'])),
         detailJob:norm(pick(o,['Detail Job','Saran Perbaikan','Job','Recommendation','Rekomendasi','Pekerjaan'])),
         estimasi:Number(String(pick(o,['Sub Total','Subtotal','Estimasi','Estimasi Job','Estimasi Biaya','Total'])||'').replace(/[^\d.-]/g,''))||0,
         booking:norm(pick(o,['Status Booking','Booking','Tanggal Booking'])),
         statusFU:norm(pick(o,['Status FU','Status Follow Up','Status Followup']))||'Belum FU',
-        note:norm(pick(o,['Catatan','Reason','Keterangan','Note']))
+        note:norm(pick(o,['Catatan','Reason','Keterangan','Note'])),
+        serviceOrder:norm(pick(o,['Service Order','SO','No Order'])),
+        repairDate:norm(pick(o,['Repair Date','Tanggal Service','Tanggal Servis'])),
+        kondisiBan:norm(pick(o,['Kondisi Ban','Ban'])),
+        kondisiAki:norm(pick(o,['Kondisi Aki','Aki']))
       };
       const dupeKey=(rec.vin||rec.plat)+'|'+rec.detailJob+'|'+rec.category;
       const exists=rows.some(x=>((x.vin||x.plat)+'|'+x.detailJob+'|'+x.category).toLowerCase()===dupeKey.toLowerCase());
@@ -304,8 +432,11 @@ async function handleUpload(){
       rows.push(rec);added++;
     });
     saveRows(); excelFile.value=''; batchName.value=''; refreshAll();
-    alert(`Upload selesai.\\nData masuk: ${added}\\nDuplikat dilewati: ${duplicate}`);
-  }catch(e){console.error(e);alert('Gagal membaca Excel. Pastikan file .xlsx/.xls/.csv valid.')}
+    alert(`Upload selesai.\nData masuk: ${added}\nDuplikat dilewati: ${duplicate}`);
+  }catch(e){
+    console.error(e);
+    alert('Gagal membaca file:\\n'+(e?.message||String(e))+'\\n\\nUntuk file Excel, gunakan format .xlsx.');
+  }
 }
 function renderBatches(){
   const groups={}; rows.forEach(r=>{const k=r.uploadDate+'|'+(r.batchName||r.sourceFile||'Batch'); if(!groups[k])groups[k]=[];groups[k].push(r)});
