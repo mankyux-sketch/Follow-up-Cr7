@@ -1,10 +1,18 @@
-# Follow Up CR-7 V3
+# Follow Up CR-7 V4
 
-Perbaikan utama:
-- Upload XLSX dibaca langsung di browser tanpa library CDN.
-- Sudah disesuaikan dengan header file CR-7 TOFIK.xlsx.
-- Mendukung .xlsx dan .csv.
-- Pesan error lebih spesifik.
-- Semua fitur V2 tetap ada: Dashboard, Upload/Hapus per batch, Follow Up WA, multi-template WA, filter, dan cek duplikat.
+Perubahan V4:
+- Update FU tidak perlu mengetik status lagi.
+- Status Follow Up berupa dropdown/pilihan.
+- Reason cepat otomatis menyesuaikan status.
+- Booking menampilkan pilihan tanggal booking.
+- Catatan tambahan tetap tersedia tetapi opsional.
+- Semua fitur sebelumnya tetap ada:
+  - Dashboard
+  - Upload XLSX/CSV langsung di browser
+  - Hapus data per batch/tanggal upload
+  - Filter SA, Category, Status, tanggal upload
+  - WhatsApp langsung
+  - Banyak template WhatsApp
+  - Cek duplikat saat upload
 
-Catatan: format .xls lama tidak didukung pada mode offline. Simpan sebagai .xlsx terlebih dahulu.
+Penyimpanan masih menggunakan localStorage browser.
