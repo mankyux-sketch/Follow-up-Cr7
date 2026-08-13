@@ -51,7 +51,7 @@
 </head>
 <body>
 <header class="topbar">
-  <div class="brand"><b>FOLLOW UP CR-7</b><small>Saran Perbaikan Setelah Servis • Monitoring Category & SA</small></div>
+  <div class="brand"><b>FOLLOW UP CR-7 <span style="font-size:11px;background:#ffffff22;padding:3px 6px;border-radius:999px">V5</span></b><small>Saran Perbaikan Setelah Servis • Monitoring Category & SA</small></div>
   <button class="menu-btn" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰ Menu</button>
 </header>
 
@@ -259,31 +259,21 @@ function renderFollowup(){
     <td>${esc(r.note||'-')}</td>
     <td>${esc(r.booking||'-')}</td>
     <td><button class="wa" onclick="openWa('${r.id}')">WhatsApp</button></td>
-    <td><button class="mini" onclick="editFollowup('${r.id}')">Pilih Status</button></td>
+    <td>
+      <select id="st_${r.id}" style="min-width:145px;padding:7px;border:1px solid #d7dde6;border-radius:8px">
+        ${['Belum FU','Sudah Dihubungi','Tidak Terhubung','Pikir-pikir','Booking','Sudah Datang','Menolak'].map(s=>`<option ${((r.statusFU||'Belum FU')===s)?'selected':''}>${s}</option>`).join('')}
+      </select>
+      <button class="mini" style="margin-top:6px;background:#1f4e79;color:#fff" onclick="saveInlineStatus('${r.id}')">Simpan</button>
+    </td>
   </tr>`).join(''):`<tr><td colspan="11" class="empty">Belum ada data / data tidak ditemukan</td></tr>`;
 }
-let currentFuId=null;
-
-function editFollowup(id){
+function saveInlineStatus(id){
   const r=rows.find(x=>x.id===id); if(!r)return;
-  currentFuId=id;
-  fuStatus.value=r.statusFU||'Belum FU';
-  fuNote.value=r.note||'';
-  fuBookingDate.value='';
-  if(r.booking){
-    const m=String(r.booking).match(/\d{4}-\d{2}-\d{2}/);
-    if(m) fuBookingDate.value=m[0];
-  }
-  updateReasonOptions();
-  const opts=[...fuReason.options].map(o=>o.value);
-  if(opts.includes(r.reason||'')) fuReason.value=r.reason;
-  else fuReason.value='';
-  fuDialog.showModal();
-}
+  const sel=document.getElementById('st_'+id);
+  if(!sel)return;
+  const status=sel.value;
 
-function updateReasonOptions(){
-  const status=fuStatus.value;
-  const reasons={
+  const quickReasons={
     'Belum FU':['Belum sempat dihubungi'],
     'Sudah Dihubungi':['Sudah tersampaikan','Menunggu keputusan customer','Minta dihubungi kembali'],
     'Tidak Terhubung':['Telepon tidak diangkat','Nomor tidak aktif','WhatsApp tidak aktif','Nomor salah','Tidak ada respon'],
@@ -292,30 +282,32 @@ function updateReasonOptions(){
     'Sudah Datang':['Sudah datang ke dealer','Sudah dikerjakan','Sudah ditangani'],
     'Menolak':['Tidak berminat','Sudah perbaiki di luar','Kendaraan dijual','Tidak merasa perlu','Menolak karena biaya']
   };
-  const list=reasons[status]||[];
-  fuReason.innerHTML='<option value="">Pilih reason</option>'+list.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
-  bookingWrap.style.display=status==='Booking'?'block':'none';
-}
 
-function saveFollowupUpdate(){
-  const r=rows.find(x=>x.id===currentFuId); if(!r)return;
-  const status=fuStatus.value;
-  const reason=fuReason.value;
-  const note=fuNote.value.trim();
-  const bookingDate=fuBookingDate.value;
+  let reason='';
+  const list=quickReasons[status]||[];
+  if(list.length){
+    reason=prompt('Pilih/isi reason:\\n\\n'+list.map((x,i)=>(i+1)+'. '+x).join('\\n'),'') ?? '';
+    reason=reason.trim();
+    if(/^\d+$/.test(reason)){
+      const idx=Number(reason)-1;
+      if(list[idx]) reason=list[idx];
+    }
+  }
+
+  let booking='';
+  if(status==='Booking'){
+    booking=prompt('Tanggal booking (contoh 2026-08-20):', r.booking?.replace('Booking ','')||'') ?? '';
+    booking=booking.trim();
+  }
 
   r.statusFU=status;
   r.reason=reason;
-  r.note=[reason,note].filter(Boolean).join(' - ');
-  if(status==='Booking'){
-    r.booking=bookingDate ? `Booking ${bookingDate}` : 'Booking';
-  } else if(status==='Sudah Datang'){
-    r.booking=r.booking||'Sudah Datang';
-  }
+  r.note=reason || r.note || '';
+  if(status==='Booking') r.booking=booking ? 'Booking '+booking : 'Booking';
+  if(status==='Sudah Datang' && !r.booking) r.booking='Sudah Datang';
   r.lastFU=new Date().toISOString();
 
   saveRows();
-  fuDialog.close();
   refreshAll();
 }
 
@@ -539,43 +531,5 @@ function sendWhatsApp(){
 uploadDate.value=new Date().toISOString().slice(0,10);
 refreshAll();
 </script>
-
-<dialog id="fuDialog">
-  <div class="modal">
-    <h3>Update Follow Up</h3>
-
-    <label class="muted">Status Follow Up</label>
-    <select id="fuStatus" onchange="updateReasonOptions()">
-      <option>Belum FU</option>
-      <option>Sudah Dihubungi</option>
-      <option>Tidak Terhubung</option>
-      <option>Pikir-pikir</option>
-      <option>Booking</option>
-      <option>Sudah Datang</option>
-      <option>Menolak</option>
-    </select>
-
-    <div id="reasonWrap">
-      <label class="muted">Reason Cepat</label>
-      <select id="fuReason">
-        <option value="">Pilih reason</option>
-      </select>
-    </div>
-
-    <div id="bookingWrap" style="display:none">
-      <label class="muted">Tanggal Booking</label>
-      <input id="fuBookingDate" type="date" />
-    </div>
-
-    <label class="muted">Catatan Tambahan (opsional)</label>
-    <textarea id="fuNote" rows="4" placeholder="Tambahkan catatan bila perlu..."></textarea>
-
-    <div class="modal-actions">
-      <button class="btn ghost" onclick="fuDialog.close()">Batal</button>
-      <button class="btn success" onclick="saveFollowupUpdate()">Simpan</button>
-    </div>
-  </div>
-</dialog>
-
 </body>
 </html>

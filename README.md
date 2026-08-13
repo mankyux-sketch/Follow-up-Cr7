@@ -1,18 +1,12 @@
-# Follow Up CR-7 V4
+# Follow Up CR-7 V5
 
-Perubahan V4:
-- Update FU tidak perlu mengetik status lagi.
-- Status Follow Up berupa dropdown/pilihan.
-- Reason cepat otomatis menyesuaikan status.
-- Booking menampilkan pilihan tanggal booking.
-- Catatan tambahan tetap tersedia tetapi opsional.
-- Semua fitur sebelumnya tetap ada:
-  - Dashboard
-  - Upload XLSX/CSV langsung di browser
-  - Hapus data per batch/tanggal upload
-  - Filter SA, Category, Status, tanggal upload
-  - WhatsApp langsung
-  - Banyak template WhatsApp
-  - Cek duplikat saat upload
+Perubahan utama:
+- Status FU sekarang berupa dropdown langsung di kolom Aksi.
+- Tidak perlu mengetik status manual lagi.
+- Pilihan: Belum FU, Sudah Dihubungi, Tidak Terhubung, Pikir-pikir, Booking, Sudah Datang, Menolak.
+- Setelah pilih status klik Simpan.
+- Reason cepat tetap tersedia.
+- Booking meminta tanggal booking.
+- Label V5 tampil di header untuk memastikan versi terbaru sudah aktif.
 
-Penyimpanan masih menggunakan localStorage browser.
+Semua fitur sebelumnya tetap ada.
