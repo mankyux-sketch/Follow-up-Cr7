@@ -1,535 +1,59 @@
 <!doctype html>
 <html lang="id">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Follow Up CR-7</title>
-<style>
-    :root{
-      --bg:#f5f7fb; --card:#fff; --text:#172033; --muted:#687386;
-      --nav:#13243c; --nav2:#1d3557; --line:#e6eaf0;
-      --danger:#c62828; --ok:#137333; --warn:#b26a00; --info:#2457d6;
-      --shadow:0 8px 24px rgba(20,30,55,.08)
-    }
-    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:var(--text)}
-    button,input,select,textarea{font:inherit}
-    .topbar{position:sticky;top:0;z-index:20;background:linear-gradient(135deg,var(--nav),var(--nav2));color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow)}
-    .brand b{font-size:20px}.brand small{display:block;opacity:.8;margin-top:2px}
-    .menu-btn{display:none;background:#ffffff18;color:#fff;border:1px solid #ffffff33;border-radius:10px;padding:9px 12px}
-    .layout{display:grid;grid-template-columns:230px 1fr;min-height:calc(100vh - 70px)}
-    .sidebar{background:#0f1d31;color:#dce5f3;padding:14px;position:sticky;top:70px;height:calc(100vh - 70px)}
-    .navbtn{width:100%;border:0;background:transparent;color:inherit;text-align:left;padding:12px 13px;border-radius:10px;margin-bottom:6px;cursor:pointer;font-weight:700}
-    .navbtn.active,.navbtn:hover{background:#213957;color:#fff}
-    .content{padding:20px;min-width:0}
-    .page{display:none}.page.active{display:block}
-    .title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
-    .title h2{margin:0}.muted{color:var(--muted);font-size:13px}
-    .cards{display:grid;grid-template-columns:repeat(6,minmax(145px,1fr));gap:12px;margin-bottom:18px}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px;box-shadow:var(--shadow)}
-    .card .k{font-size:12px;color:var(--muted);font-weight:700}.card .v{font-size:24px;font-weight:800;margin-top:4px}.card .s{font-size:12px;color:var(--muted);margin-top:5px}
-    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow)}
-    .panel h3{margin:0 0 12px}.barrow{display:flex;align-items:center;gap:8px;margin:10px 0}.barlabel{width:110px;font-size:13px}.bar{flex:1;background:#edf1f6;border-radius:999px;height:10px;overflow:hidden}.bar i{display:block;height:100%;background:#4b6cb7}.barval{width:50px;text-align:right;font-size:12px;color:var(--muted)}
-    .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.toolbar input,.toolbar select{background:#fff;border:1px solid #d7dde6;border-radius:10px;padding:10px 11px;min-height:42px}
-    .toolbar .grow{flex:1;min-width:240px}
-    .btn{border:0;border-radius:10px;padding:10px 14px;font-weight:800;cursor:pointer}.btn.primary{background:#1f4e79;color:#fff}.btn.success{background:#137333;color:#fff}.btn.danger{background:#b3261e;color:#fff}.btn.ghost{background:#edf1f6;color:#233}
-    .table-wrap{overflow:auto;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
-    table{width:100%;border-collapse:collapse;min-width:1100px}th,td{padding:10px 11px;border-bottom:1px solid #edf0f4;text-align:left;vertical-align:top;font-size:13px}th{position:sticky;top:0;background:#f7f9fc;z-index:1}
-    .badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:800}
-    .cat-safety{background:#fde8e7;color:#a61b1b}.cat-urgent{background:#fff0dd;color:#9a5400}.cat-comfortable{background:#eaf2ff;color:#2855a6}.cat-efficient{background:#e8f6ec;color:#1f6d38}
-    .status-belum{background:#edf0f5;color:#4b5563}.status-booking{background:#e5f3ff;color:#145a9b}.status-datang{background:#e7f7ec;color:#1e6d37}.status-menolak{background:#fde8e7;color:#9c2020}.status-other{background:#fff3cd;color:#7a5a00}
-    .wa{background:#25D366;color:white;border:0;border-radius:9px;padding:8px 10px;font-weight:800;cursor:pointer}
-    .mini{padding:7px 9px;border-radius:8px;border:0;cursor:pointer;font-weight:700}
-    .input-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
-    .formgrid{display:grid;grid-template-columns:repeat(4,minmax(180px,1fr));gap:10px}.formgrid label{font-size:12px;font-weight:700;color:var(--muted)}.formgrid input,.formgrid select,.formgrid textarea{width:100%;border:1px solid #d7dde6;border-radius:9px;padding:10px;margin-top:5px}
-    .template-card{display:grid;grid-template-columns:1fr auto;gap:10px;padding:14px;border:1px solid var(--line);border-radius:12px;margin-bottom:10px}.template-card pre{white-space:pre-wrap;margin:6px 0 0;font-family:inherit;color:#445}
-    .notice{background:#eef5ff;border:1px solid #cfe1ff;padding:12px 14px;border-radius:10px;color:#24496c;margin-bottom:12px;font-size:13px}
-    .empty{padding:36px;text-align:center;color:var(--muted)}
-    dialog{border:0;border-radius:16px;padding:0;max-width:720px;width:calc(100% - 24px);box-shadow:0 24px 70px rgba(0,0,0,.3)}dialog::backdrop{background:#0008}.modal{padding:18px}.modal h3{margin-top:0}.modal textarea,.modal select,.modal input{width:100%;border:1px solid #d7dde6;border-radius:9px;padding:10px;margin:5px 0 10px}.modal-actions{display:flex;justify-content:flex-end;gap:8px}
-    @media(max-width:1100px){.cards{grid-template-columns:repeat(3,1fr)}.formgrid{grid-template-columns:repeat(2,1fr)}}
-    @media(max-width:760px){.menu-btn{display:block}.layout{grid-template-columns:1fr}.sidebar{position:fixed;left:-250px;top:67px;width:230px;z-index:30;transition:.2s}.sidebar.open{left:0}.content{padding:12px}.cards{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.formgrid{grid-template-columns:1fr}.brand small{display:none}}
+  <style>
+    body{margin:0;font-family:Arial,sans-serif;background:#f5f7fb;color:#172033}
+    .loading{min-height:100vh;display:grid;place-items:center;text-align:center;padding:24px}
+    .box{background:#fff;border:1px solid #e6eaf0;border-radius:16px;padding:24px;box-shadow:0 8px 24px rgba(20,30,55,.08);max-width:520px}
   </style>
 </head>
 <body>
-<header class="topbar">
-  <div class="brand"><b>FOLLOW UP CR-7 <span style="font-size:11px;background:#ffffff22;padding:3px 6px;border-radius:999px">V5</span></b><small>Saran Perbaikan Setelah Servis • Monitoring Category & SA</small></div>
-  <button class="menu-btn" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰ Menu</button>
-</header>
-
-<div class="layout">
-  <aside class="sidebar">
-    <button class="navbtn active" data-page="dashboard">📊 Dashboard</button>
-    <button class="navbtn" data-page="followup">📞 Follow Up</button>
-    <button class="navbtn" data-page="upload">📤 Upload / Hapus Data</button>
-    <button class="navbtn" data-page="templates">💬 Template WA</button>
-  </aside>
-
-  <main class="content">
-    <section id="dashboard" class="page active">
-      <div class="title"><div><h2>Dashboard CR-7</h2><div class="muted">Ringkasan follow up saran perbaikan setelah servis</div></div><button class="btn ghost" onclick="refreshAll()">↻ Refresh</button></div>
-      <div class="cards">
-        <div class="card"><div class="k">TOTAL DATA</div><div class="v" id="dTotal">0</div><div class="s">Semua batch upload</div></div>
-        <div class="card"><div class="k">BELUM FU</div><div class="v" id="dBelum">0</div><div class="s">Perlu dihubungi</div></div>
-        <div class="card"><div class="k">SUDAH FU</div><div class="v" id="dSudah">0</div><div class="s">Sudah ada aktivitas</div></div>
-        <div class="card"><div class="k">BOOKING</div><div class="v" id="dBooking">0</div><div class="s">Customer booking</div></div>
-        <div class="card"><div class="k">SUDAH DATANG</div><div class="v" id="dDatang">0</div><div class="s">Konversi follow up</div></div>
-        <div class="card"><div class="k">POTENSI ESTIMASI</div><div class="v" id="dPotensi">Rp0</div><div class="s">Total estimasi pekerjaan</div></div>
-      </div>
-      <div class="grid2">
-        <div class="panel"><h3>Category</h3><div id="categoryBars"></div></div>
-        <div class="panel"><h3>Service Advisor</h3><div id="saBars"></div></div>
-      </div>
-    </section>
-
-    <section id="followup" class="page">
-      <div class="title"><div><h2>Follow Up Customer</h2><div class="muted">Filter data, update status, dan kirim WhatsApp</div></div></div>
-      <div class="toolbar">
-        <input id="searchFU" class="grow" placeholder="Cari plat, no rangka, customer, telepon, detail job..." />
-        <select id="filterSA"><option value="">Semua SA</option></select>
-        <select id="filterCat"><option value="">Semua Category</option></select>
-        <select id="filterStatus"><option value="">Semua Status</option></select>
-        <select id="filterBatch"><option value="">Semua Tgl Upload</option></select>
-        <button class="btn ghost" onclick="resetFilters()">Reset</button>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Prioritas</th><th>SA</th><th>Plat / Customer</th><th>Category</th><th>Saran Perbaikan</th><th>Estimasi</th><th>Status FU</th><th>Catatan</th><th>Booking</th><th>WA</th><th>Aksi</th></tr></thead>
-          <tbody id="fuBody"></tbody>
-        </table>
-      </div>
-    </section>
-
-    <section id="upload" class="page">
-      <div class="title"><div><h2>Upload / Hapus Data</h2><div class="muted">Upload Excel CR-7 dan kelola data berdasarkan tanggal upload</div></div></div>
-      <div class="notice">Format Excel fleksibel dan dibaca langsung di browser (tanpa CDN). Sistem mencoba membaca kolom seperti Category, Service Advisor/SA, Police No/Plat, No Rangka/VIN, Customer, Telephone, Detail Job/Saran Perbaikan, Estimasi/Sub Total, dan Status Booking. Data disimpan di browser perangkat ini.</div>
-      <div class="input-card">
-        <div class="formgrid">
-          <div><label>Pilih file Excel<input id="excelFile" type="file" accept=".xlsx,.csv" /></label></div>
-          <div><label>Tanggal Upload<input id="uploadDate" type="date" /></label></div>
-          <div><label>Nama Batch (opsional)<input id="batchName" placeholder="Contoh: CR-7 Agustus Minggu 2" /></label></div>
-          <div style="display:flex;align-items:end"><button class="btn primary" onclick="handleUpload()" style="width:100%">Upload Data</button></div>
-        </div>
-      </div>
-      <div class="panel">
-        <h3>Riwayat Batch Upload</h3>
-        <div id="batchList"></div>
-      </div>
-    </section>
-
-    <section id="templates" class="page">
-      <div class="title"><div><h2>Template WhatsApp</h2><div class="muted">Buat beberapa template dan pilih saat follow up</div></div><button class="btn primary" onclick="openTemplate()">+ Template Baru</button></div>
-      <div class="notice">Variabel otomatis: <b>{nama}</b>, <b>{plat}</b>, <b>{sa}</b>, <b>{category}</b>, <b>{saran}</b>, <b>{estimasi}</b>, <b>{booking}</b>.</div>
-      <div id="templateList"></div>
-    </section>
-  </main>
+<div class="loading" id="loader">
+  <div class="box">
+    <h3>FOLLOW UP CR-7</h3>
+    <p>Memuat aplikasi...</p>
+  </div>
 </div>
-
-<dialog id="templateDialog">
-  <div class="modal">
-    <h3 id="tplTitle">Template WhatsApp</h3>
-    <input id="tplName" placeholder="Nama template" />
-    <textarea id="tplText" rows="10" placeholder="Isi template..."></textarea>
-    <div class="modal-actions"><button class="btn ghost" onclick="templateDialog.close()">Batal</button><button class="btn success" onclick="saveTemplate()">Simpan</button></div>
-  </div>
-</dialog>
-
-<dialog id="waDialog">
-  <div class="modal">
-    <h3>Kirim WhatsApp</h3>
-    <label class="muted">Pilih Template</label>
-    <select id="waTemplate" onchange="renderWaPreview()"></select>
-    <label class="muted">Pesan</label>
-    <textarea id="waPreview" rows="11"></textarea>
-    <div class="modal-actions"><button class="btn ghost" onclick="waDialog.close()">Batal</button><button class="btn success" onclick="sendWhatsApp()">Buka WhatsApp</button></div>
-  </div>
-</dialog>
-
 <script>
-const K_DATA='cr7_v2_data', K_TPL='cr7_v2_templates';
-let rows = JSON.parse(localStorage.getItem(K_DATA)||'[]');
-let templates = JSON.parse(localStorage.getItem(K_TPL)||'[]');
-let editTplId=null, currentWaId=null;
-
-if(!templates.length){
-  templates=[{
-    id:crypto.randomUUID(), name:'Template Follow Up CR-7',
-    text:'Selamat siang Bapak/Ibu {nama}, kami dari Agung Toyota ingin menindaklanjuti saran perbaikan kendaraan {plat}.\\n\\nSaran perbaikan: {saran}\\nKategori: {category}\\nEstimasi: {estimasi}\\n\\nApakah Bapak/Ibu berkenan kami bantu jadwalkan pengerjaannya?\\n\\nTerima kasih.\\nSA: {sa}'
-  }];
-  saveTemplates();
-}
-
-function saveRows(){ localStorage.setItem(K_DATA,JSON.stringify(rows)); }
-function saveTemplates(){ localStorage.setItem(K_TPL,JSON.stringify(templates)); }
-function rupiah(v){
-  const n=Number(String(v??'').replace(/[^\d.-]/g,''))||0;
-  return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(n);
-}
-function norm(s){return String(s??'').trim();}
-function keyNorm(s){return norm(s).toLowerCase().replace(/[^a-z0-9]/g,'');}
-function pick(obj, names){
-  const map={}; Object.keys(obj).forEach(k=>map[keyNorm(k)]=obj[k]);
-  for(const n of names){const k=keyNorm(n); if(k in map && map[k]!=='' && map[k]!=null) return map[k];}
-  return '';
-}
-function normalizePhone(v){
-  let s=String(v??'').replace(/[^\d]/g,'');
-  if(s.startsWith('0')) s='62'+s.slice(1);
-  if(s.startsWith('8')) s='62'+s;
-  return s;
-}
-function categoryClass(c){
-  c=norm(c).toLowerCase();
-  if(c.includes('safety')) return 'cat-safety';
-  if(c.includes('urgent')) return 'cat-urgent';
-  if(c.includes('comfort')) return 'cat-comfortable';
-  if(c.includes('efficient')) return 'cat-efficient';
-  return 'status-belum';
-}
-function priority(c){
-  c=norm(c).toLowerCase();
-  if(c.includes('safety')) return '1 - SAFETY';
-  if(c.includes('urgent')) return '2 - URGENT';
-  if(c.includes('efficient')) return '3 - EFFICIENT';
-  return '4 - COMFORTABLE';
-}
-function statusClass(s){
-  s=norm(s).toLowerCase();
-  if(!s || s==='belum fu') return 'status-belum';
-  if(s.includes('booking')) return 'status-booking';
-  if(s.includes('datang')) return 'status-datang';
-  if(s.includes('menolak')) return 'status-menolak';
-  return 'status-other';
-}
-function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
-function fmtDate(s){ if(!s) return '-'; const d=new Date(s+'T00:00:00'); return isNaN(d)?s:d.toLocaleDateString('id-ID');}
-
-document.querySelectorAll('.navbtn').forEach(b=>b.addEventListener('click',()=>{
-  document.querySelectorAll('.navbtn').forEach(x=>x.classList.remove('active')); b.classList.add('active');
-  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active')); document.getElementById(b.dataset.page).classList.add('active');
-  document.querySelector('.sidebar').classList.remove('open'); refreshAll();
-}));
-
-['searchFU','filterSA','filterCat','filterStatus','filterBatch'].forEach(id=>document.getElementById(id).addEventListener(id==='searchFU'?'input':'change',renderFollowup));
-
-function refreshAll(){ renderDashboard(); populateFilters(); renderFollowup(); renderBatches(); renderTemplates(); }
-
-function renderDashboard(){
-  const total=rows.length;
-  const belum=rows.filter(r=>!r.statusFU || r.statusFU==='Belum FU').length;
-  const booking=rows.filter(r=>String(r.statusFU).toLowerCase().includes('booking') || norm(r.booking).toLowerCase().includes('booking')).length;
-  const datang=rows.filter(r=>String(r.statusFU).toLowerCase().includes('datang')).length;
-  const sudah=total-belum;
-  const pot=rows.reduce((a,r)=>a+(Number(r.estimasi)||0),0);
-  dTotal.textContent=total; dBelum.textContent=belum; dSudah.textContent=sudah; dBooking.textContent=booking; dDatang.textContent=datang; dPotensi.textContent=rupiah(pot);
-  renderBars('categoryBars',countBy(rows,'category'));
-  renderBars('saBars',countBy(rows,'sa'));
-}
-function countBy(arr,k){const o={};arr.forEach(r=>{const v=norm(r[k])||'Kosong';o[v]=(o[v]||0)+1});return o}
-function renderBars(id,obj){
-  const el=document.getElementById(id), vals=Object.entries(obj).sort((a,b)=>b[1]-a[1]), max=Math.max(1,...vals.map(x=>x[1]));
-  el.innerHTML=vals.length?vals.map(([k,v])=>`<div class="barrow"><div class="barlabel">${esc(k)}</div><div class="bar"><i style="width:${v/max*100}%"></i></div><div class="barval">${v}</div></div>`).join(''):'<div class="empty">Belum ada data</div>';
-}
-function populateFilters(){
-  setOpts('filterSA',[...new Set(rows.map(r=>r.sa).filter(Boolean))].sort(),'Semua SA');
-  setOpts('filterCat',[...new Set(rows.map(r=>r.category).filter(Boolean))].sort(),'Semua Category');
-  setOpts('filterStatus',[...new Set(rows.map(r=>r.statusFU||'Belum FU'))].sort(),'Semua Status');
-  setOpts('filterBatch',[...new Set(rows.map(r=>r.uploadDate).filter(Boolean))].sort().reverse(),'Semua Tgl Upload',true);
-}
-function setOpts(id,vals,first,isDate=false){
-  const el=document.getElementById(id), old=el.value;
-  el.innerHTML=`<option value="">${first}</option>`+vals.map(v=>`<option value="${esc(v)}">${isDate?fmtDate(v):esc(v)}</option>`).join('');
-  if(vals.includes(old)) el.value=old;
-}
-function resetFilters(){
-  ['searchFU','filterSA','filterCat','filterStatus','filterBatch'].forEach(id=>document.getElementById(id).value='');renderFollowup();
-}
-function renderFollowup(){
-  const q=searchFU.value.toLowerCase(), sa=filterSA.value, cat=filterCat.value, st=filterStatus.value, bt=filterBatch.value;
-  let data=rows.filter(r=>{
-    const hay=[r.plat,r.vin,r.customer,r.phone,r.detailJob,r.sa,r.category].join(' ').toLowerCase();
-    return (!q||hay.includes(q))&&(!sa||r.sa===sa)&&(!cat||r.category===cat)&&(!st||(r.statusFU||'Belum FU')===st)&&(!bt||r.uploadDate===bt);
-  }).sort((a,b)=>priority(a.category).localeCompare(priority(b.category)) || (a.customer||'').localeCompare(b.customer||''));
-  fuBody.innerHTML=data.length?data.map(r=>`<tr>
-    <td><b>${esc(priority(r.category))}</b></td>
-    <td>${esc(r.sa||'-')}</td>
-    <td><b>${esc(r.plat||'-')}</b><br>${esc(r.customer||'-')}<br><span class="muted">${esc(r.phone||'')}</span></td>
-    <td><span class="badge ${categoryClass(r.category)}">${esc(r.category||'-')}</span></td>
-    <td>${esc(r.detailJob||'-')}</td>
-    <td><b>${rupiah(r.estimasi)}</b></td>
-    <td><span class="badge ${statusClass(r.statusFU)}">${esc(r.statusFU||'Belum FU')}</span></td>
-    <td>${esc(r.note||'-')}</td>
-    <td>${esc(r.booking||'-')}</td>
-    <td><button class="wa" onclick="openWa('${r.id}')">WhatsApp</button></td>
-    <td>
-      <select id="st_${r.id}" style="min-width:145px;padding:7px;border:1px solid #d7dde6;border-radius:8px">
-        ${['Belum FU','Sudah Dihubungi','Tidak Terhubung','Pikir-pikir','Booking','Sudah Datang','Menolak'].map(s=>`<option ${((r.statusFU||'Belum FU')===s)?'selected':''}>${s}</option>`).join('')}
-      </select>
-      <button class="mini" style="margin-top:6px;background:#1f4e79;color:#fff" onclick="saveInlineStatus('${r.id}')">Simpan</button>
-    </td>
-  </tr>`).join(''):`<tr><td colspan="11" class="empty">Belum ada data / data tidak ditemukan</td></tr>`;
-}
-function saveInlineStatus(id){
-  const r=rows.find(x=>x.id===id); if(!r)return;
-  const sel=document.getElementById('st_'+id);
-  if(!sel)return;
-  const status=sel.value;
-
-  const quickReasons={
-    'Belum FU':['Belum sempat dihubungi'],
-    'Sudah Dihubungi':['Sudah tersampaikan','Menunggu keputusan customer','Minta dihubungi kembali'],
-    'Tidak Terhubung':['Telepon tidak diangkat','Nomor tidak aktif','WhatsApp tidak aktif','Nomor salah','Tidak ada respon'],
-    'Pikir-pikir':['Masih dipertimbangkan','Diskusi keluarga','Belum ada dana','Menunggu waktu yang tepat','Minta follow up kembali'],
-    'Booking':['Booking sudah dibuat','Customer minta dijadwalkan'],
-    'Sudah Datang':['Sudah datang ke dealer','Sudah dikerjakan','Sudah ditangani'],
-    'Menolak':['Tidak berminat','Sudah perbaiki di luar','Kendaraan dijual','Tidak merasa perlu','Menolak karena biaya']
-  };
-
-  let reason='';
-  const list=quickReasons[status]||[];
-  if(list.length){
-    reason=prompt('Pilih/isi reason:\\n\\n'+list.map((x,i)=>(i+1)+'. '+x).join('\\n'),'') ?? '';
-    reason=reason.trim();
-    if(/^\d+$/.test(reason)){
-      const idx=Number(reason)-1;
-      if(list[idx]) reason=list[idx];
-    }
-  }
-
-  let booking='';
-  if(status==='Booking'){
-    booking=prompt('Tanggal booking (contoh 2026-08-20):', r.booking?.replace('Booking ','')||'') ?? '';
-    booking=booking.trim();
-  }
-
-  r.statusFU=status;
-  r.reason=reason;
-  r.note=reason || r.note || '';
-  if(status==='Booking') r.booking=booking ? 'Booking '+booking : 'Booking';
-  if(status==='Sudah Datang' && !r.booking) r.booking='Sudah Datang';
-  r.lastFU=new Date().toISOString();
-
-  saveRows();
-  refreshAll();
-}
-
-
-function colIndexFromRef(ref){
-  const m=String(ref||'').match(/[A-Z]+/i); if(!m)return 0;
-  let n=0; for(const ch of m[0].toUpperCase()) n=n*26+(ch.charCodeAt(0)-64);
-  return n-1;
-}
-async function unzipXlsx(arrayBuffer){
-  const u8=new Uint8Array(arrayBuffer), dv=new DataView(arrayBuffer);
-  let eocd=-1;
-  for(let i=u8.length-22;i>=Math.max(0,u8.length-65557);i--){
-    if(dv.getUint32(i,true)===0x06054b50){eocd=i;break}
-  }
-  if(eocd<0) throw new Error('Struktur ZIP/XLSX tidak ditemukan');
-  const total=dv.getUint16(eocd+10,true), cdOffset=dv.getUint32(eocd+16,true);
-  let p=cdOffset; const entries={}; const decoder=new TextDecoder();
-  for(let i=0;i<total;i++){
-    if(dv.getUint32(p,true)!==0x02014b50) throw new Error('Central directory XLSX rusak');
-    const method=dv.getUint16(p+10,true), csize=dv.getUint32(p+20,true);
-    const nlen=dv.getUint16(p+28,true), xlen=dv.getUint16(p+30,true), clen=dv.getUint16(p+32,true);
-    const local=dv.getUint32(p+42,true);
-    const name=decoder.decode(u8.slice(p+46,p+46+nlen));
-    if(dv.getUint32(local,true)!==0x04034b50) throw new Error('Local file XLSX rusak');
-    const ln=dv.getUint16(local+26,true), lx=dv.getUint16(local+28,true);
-    const dataStart=local+30+ln+lx, comp=u8.slice(dataStart,dataStart+csize);
-    entries[name]={method,comp};
-    p+=46+nlen+xlen+clen;
-  }
-  async function text(name){
-    const e=entries[name]; if(!e) return '';
-    let bytes;
-    if(e.method===0) bytes=e.comp;
-    else if(e.method===8){
-      if(typeof DecompressionStream==='undefined') throw new Error('Browser ini belum mendukung pembacaan XLSX offline');
-      const ds=new DecompressionStream('deflate-raw');
-      const ab=await new Response(new Blob([e.comp]).stream().pipeThrough(ds)).arrayBuffer();
-      bytes=new Uint8Array(ab);
-    } else throw new Error('Metode kompresi XLSX tidak didukung: '+e.method);
-    return decoder.decode(bytes);
-  }
-  return {text,entries};
-}
-function parseXml(s){
-  const x=new DOMParser().parseFromString(s,'application/xml');
-  if(x.querySelector('parsererror')) throw new Error('XML di dalam XLSX tidak valid');
-  return x;
-}
-async function parseXlsxOffline(file){
-  const zip=await unzipXlsx(await file.arrayBuffer());
-  let shared=[];
-  const ss=await zip.text('xl/sharedStrings.xml');
-  if(ss){
-    const doc=parseXml(ss);
-    shared=[...doc.getElementsByTagName('si')].map(si=>[...si.getElementsByTagName('t')].map(t=>t.textContent||'').join(''));
-  }
-
-  let sheetPath='xl/worksheets/sheet1.xml';
-  const wbText=await zip.text('xl/workbook.xml');
-  const relText=await zip.text('xl/_rels/workbook.xml.rels');
-  if(wbText && relText){
-    const wb=parseXml(wbText), rel=parseXml(relText);
-    const first=wb.getElementsByTagName('sheet')[0];
-    if(first){
-      const rid=first.getAttribute('r:id') || first.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id');
-      const relation=[...rel.getElementsByTagName('Relationship')].find(r=>r.getAttribute('Id')===rid);
-      if(relation){
-        let target=relation.getAttribute('Target')||'worksheets/sheet1.xml';
-        target=target.replace(/^\/+/,'');
-        sheetPath=target.startsWith('xl/')?target:'xl/'+target.replace(/^\.\//,'');
-      }
-    }
-  }
-
-  const sheetText=await zip.text(sheetPath);
-  if(!sheetText) throw new Error('Sheet pertama tidak ditemukan di XLSX');
-  const doc=parseXml(sheetText);
-  const matrix=[];
-  for(const row of [...doc.getElementsByTagName('row')]){
-    const arr=[];
-    for(const c of [...row.getElementsByTagName('c')]){
-      const idx=colIndexFromRef(c.getAttribute('r'));
-      const type=c.getAttribute('t')||'';
-      let value='';
-      const v=c.getElementsByTagName('v')[0];
-      if(type==='inlineStr'){
-        value=[...c.getElementsByTagName('t')].map(t=>t.textContent||'').join('');
-      }else if(v){
-        const raw=v.textContent||'';
-        if(type==='s') value=shared[Number(raw)] ?? raw;
-        else if(type==='b') value=raw==='1'?'TRUE':'FALSE';
-        else value=raw;
-      }
-      arr[idx]=value;
-    }
-    matrix.push(arr);
-  }
-  if(!matrix.length) return [];
-  const headers=(matrix[0]||[]).map((h,i)=>String(h||'').trim() || `__EMPTY_${i}`);
-  return matrix.slice(1).filter(r=>r.some(v=>String(v??'').trim()!=='')).map(r=>{
-    const o={}; headers.forEach((h,i)=>o[h]=r[i]??''); return o;
-  });
-}
-function parseCsvText(text){
-  const rows=[]; let row=[], cell='', q=false;
-  for(let i=0;i<text.length;i++){
-    const ch=text[i], nx=text[i+1];
-    if(ch==='"'){
-      if(q && nx==='"'){cell+='"';i++} else q=!q;
-    }else if(ch===',' && !q){row.push(cell);cell=''}
-    else if((ch==='\n'||ch==='\r') && !q){
-      if(ch==='\r' && nx==='\n')i++;
-      row.push(cell);cell=''; if(row.some(v=>v!==''))rows.push(row);row=[];
-    }else cell+=ch;
-  }
-  row.push(cell); if(row.some(v=>v!==''))rows.push(row);
-  if(!rows.length)return[];
-  const headers=rows[0].map((h,i)=>String(h||'').trim()||`__EMPTY_${i}`);
-  return rows.slice(1).map(r=>{const o={};headers.forEach((h,i)=>o[h]=r[i]??'');return o});
-}
-async function readSpreadsheet(file){
-  const ext=(file.name.split('.').pop()||'').toLowerCase();
-  if(ext==='csv') return parseCsvText(await file.text());
-  if(ext==='xlsx') return await parseXlsxOffline(file);
-  if(ext==='xls') throw new Error('Format .xls lama belum didukung offline. Simpan ulang sebagai .xlsx lalu upload kembali.');
-  throw new Error('Format file harus .xlsx atau .csv');
-}
-async function handleUpload(){
-  const file=excelFile.files[0]; if(!file){alert('Pilih file Excel terlebih dahulu.');return}
-  const date=uploadDate.value || new Date().toISOString().slice(0,10);
-  const bname=batchName.value.trim();
+(async function(){
+  const ORIGINAL_URL='https://raw.githubusercontent.com/mankyux-sketch/Follow-up-Cr7/9c4e1527f92d739638fe8a561442f80b09935a04/index.html';
   try{
-    const raw=await readSpreadsheet(file);
-    if(!raw.length){alert('Excel tidak berisi data.');return}
-    let added=0, duplicate=0;
-    raw.forEach(o=>{
-      const rec={
-        id:crypto.randomUUID(),
-        uploadDate:date,batchName:bname||file.name, sourceFile:file.name,
-        category:norm(pick(o,['Category','Kategori'])),
-        sa:norm(pick(o,['Service Advisor','SA','Advisor','PIC SA'])),
-        plat:norm(pick(o,['Police No','Police_No','Plat','No Polisi','Nopol','Nomor Polisi'])),
-        vin:norm(pick(o,['No Rangka','Norangka','Rangka','VIN','Chassis No','Chassis'])),
-        customer:norm(pick(o,['Customer','Customer Name','Nama Customer','Nama','Contact person','Contact Person'])),
-        phone:norm(pick(o,['Telephone CP','Telephone','Phone','No HP','No WA','WA','Handphone'])),
-        detailJob:norm(pick(o,['Detail Job','Saran Perbaikan','Job','Recommendation','Rekomendasi','Pekerjaan'])),
-        estimasi:Number(String(pick(o,['Sub Total','Subtotal','Estimasi','Estimasi Job','Estimasi Biaya','Total'])||'').replace(/[^\d.-]/g,''))||0,
-        booking:norm(pick(o,['Status Booking','Booking','Tanggal Booking'])),
-        statusFU:norm(pick(o,['Status FU','Status Follow Up','Status Followup']))||'Belum FU',
-        note:norm(pick(o,['Catatan','Reason','Keterangan','Note'])),
-        serviceOrder:norm(pick(o,['Service Order','SO','No Order'])),
-        repairDate:norm(pick(o,['Repair Date','Tanggal Service','Tanggal Servis'])),
-        kondisiBan:norm(pick(o,['Kondisi Ban','Ban'])),
-        kondisiAki:norm(pick(o,['Kondisi Aki','Aki']))
-      };
-      const dupeKey=(rec.vin||rec.plat)+'|'+rec.detailJob+'|'+rec.category;
-      const exists=rows.some(x=>((x.vin||x.plat)+'|'+x.detailJob+'|'+x.category).toLowerCase()===dupeKey.toLowerCase());
-      if(exists){duplicate++; return}
-      rows.push(rec);added++;
-    });
-    saveRows(); excelFile.value=''; batchName.value=''; refreshAll();
-    alert(`Upload selesai.\nData masuk: ${added}\nDuplikat dilewati: ${duplicate}`);
-  }catch(e){
-    console.error(e);
-    alert('Gagal membaca file:\\n'+(e?.message||String(e))+'\\n\\nUntuk file Excel, gunakan format .xlsx.');
+    const res=await fetch(ORIGINAL_URL,{cache:'no-store'});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    let html=await res.text();
+
+    const oldMenu='<button class="navbtn" data-page="templates">💬 Template WA</button>';
+    const downloadMenu=`<button
+      onclick="window.location.href='download.html'"
+      style="width:100%;border:0;background:transparent;color:inherit;text-align:left;padding:12px 13px;border-radius:10px;margin-bottom:6px;cursor:pointer;font-weight:700"
+      onmouseover="this.style.background='#213957';this.style.color='#fff'"
+      onmouseout="this.style.background='transparent';this.style.color='inherit'">📥 Download Excel</button>`;
+
+    if(html.includes(oldMenu)){
+      html=html.replace(oldMenu,downloadMenu+'\n    '+oldMenu);
+    }else{
+      throw new Error('Posisi menu CR-7 tidak ditemukan');
+    }
+
+    // Tambahkan penanda versi tanpa mengubah fungsi aplikasi.
+    html=html.replace('>V5</span>','>V5 + EXCEL</span>');
+
+    document.open();
+    document.write(html);
+    document.close();
+  }catch(err){
+    console.error(err);
+    document.getElementById('loader').innerHTML=`
+      <div class="box">
+        <h3>CR-7 gagal dimuat</h3>
+        <p>Silakan refresh halaman. Data Follow Up di browser tidak terhapus.</p>
+        <p style="font-size:12px;color:#687386">${String(err.message||err)}</p>
+      </div>`;
   }
-}
-function renderBatches(){
-  const groups={}; rows.forEach(r=>{const k=r.uploadDate+'|'+(r.batchName||r.sourceFile||'Batch'); if(!groups[k])groups[k]=[];groups[k].push(r)});
-  const arr=Object.entries(groups).sort((a,b)=>b[0].localeCompare(a[0]));
-  batchList.innerHTML=arr.length?arr.map(([k,v])=>{
-    const [d,...nm]=k.split('|'); const potential=v.reduce((a,r)=>a+(Number(r.estimasi)||0),0);
-    return `<div class="template-card"><div><b>${esc(nm.join('|'))}</b><div class="muted">Tanggal upload: ${fmtDate(d)} • ${v.length} data • Potensi ${rupiah(potential)}</div></div><button class="btn danger" onclick="deleteBatch('${esc(k)}')">Hapus Batch</button></div>`
-  }).join(''):'<div class="empty">Belum ada batch upload</div>';
-}
-function deleteBatch(k){
-  const [d,...nm]=k.split('|'), name=nm.join('|');
-  const n=rows.filter(r=>r.uploadDate===d && (r.batchName||r.sourceFile||'Batch')===name).length;
-  if(!confirm(`Hapus ${n} data dari batch "${name}" tanggal ${fmtDate(d)}?\\nData batch lain tidak akan dihapus.`))return;
-  rows=rows.filter(r=>!(r.uploadDate===d && (r.batchName||r.sourceFile||'Batch')===name));
-  saveRows();refreshAll();
-}
-
-function renderTemplates(){
-  templateList.innerHTML=templates.length?templates.map(t=>`<div class="template-card"><div><b>${esc(t.name)}</b><pre>${esc(t.text)}</pre></div><div><button class="mini" onclick="openTemplate('${t.id}')">Edit</button> <button class="mini" style="background:#fde8e7;color:#9c2020" onclick="deleteTemplate('${t.id}')">Hapus</button></div></div>`).join(''):'<div class="empty">Belum ada template</div>';
-}
-function openTemplate(id=null){
-  editTplId=id; const t=templates.find(x=>x.id===id);
-  tplTitle.textContent=id?'Edit Template':'Template Baru'; tplName.value=t?.name||''; tplText.value=t?.text||''; templateDialog.showModal();
-}
-function saveTemplate(){
-  const name=tplName.value.trim(), text=tplText.value.trim(); if(!name||!text){alert('Nama dan isi template wajib diisi.');return}
-  if(editTplId){const t=templates.find(x=>x.id===editTplId); t.name=name;t.text=text}else templates.push({id:crypto.randomUUID(),name,text});
-  saveTemplates();templateDialog.close();renderTemplates();
-}
-function deleteTemplate(id){
-  if(!confirm('Hapus template ini?'))return; templates=templates.filter(x=>x.id!==id);saveTemplates();renderTemplates();
-}
-function openWa(id){
-  const r=rows.find(x=>x.id===id); if(!r)return;
-  if(!normalizePhone(r.phone)){alert('Nomor WhatsApp customer belum tersedia / tidak valid.');return}
-  currentWaId=id; waTemplate.innerHTML=templates.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('');
-  renderWaPreview(); waDialog.showModal();
-}
-function renderWaPreview(){
-  const r=rows.find(x=>x.id===currentWaId), t=templates.find(x=>x.id===waTemplate.value)||templates[0]; if(!r||!t)return;
-  let msg=t.text;
-  const repl={nama:r.customer||'',plat:r.plat||'',sa:r.sa||'',category:r.category||'',saran:r.detailJob||'',estimasi:rupiah(r.estimasi),booking:r.booking||''};
-  Object.entries(repl).forEach(([k,v])=>msg=msg.split('{'+k+'}').join(v));
-  waPreview.value=msg;
-}
-function sendWhatsApp(){
-  const r=rows.find(x=>x.id===currentWaId); if(!r)return;
-  const ph=normalizePhone(r.phone), msg=waPreview.value;
-  window.open(`https://wa.me/${ph}?text=${encodeURIComponent(msg)}`,'_blank');
-  if(!r.statusFU || r.statusFU==='Belum FU') r.statusFU='Sudah Dihubungi';
-  r.lastFU=new Date().toISOString(); saveRows(); waDialog.close(); refreshAll();
-}
-
-uploadDate.value=new Date().toISOString().slice(0,10);
-refreshAll();
+})();
 </script>
 </body>
 </html>
