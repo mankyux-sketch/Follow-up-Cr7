@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Download Excel - Follow Up CR-7</title>
+<style>
+:root{
+  --bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#687386;
+  --nav:#13243c;--nav2:#1d3557;--line:#e6eaf0;
+  --ok:#137333;--info:#1f4e79;--warn:#b26a00;
+  --shadow:0 8px 24px rgba(20,30,55,.08)
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:var(--text)}
+.topbar{background:linear-gradient(135deg,var(--nav),var(--nav2));color:#fff;padding:16px 20px;box-shadow:var(--shadow)}
+.topbar b{font-size:20px}.topbar small{display:block;opacity:.8;margin-top:3px}
+.wrap{max-width:950px;margin:28px auto;padding:0 16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:var(--shadow)}
+.title{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+h2{margin:0}.muted{color:var(--muted);font-size:13px;line-height:1.5}
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0}
+.kpi{border:1px solid var(--line);border-radius:12px;padding:15px;background:#f9fbfd}
+.kpi span{display:block;font-size:11px;font-weight:800;color:var(--muted)}
+.kpi strong{display:block;font-size:28px;margin-top:5px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+button,a.btn{border:0;border-radius:10px;padding:12px 16px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.primary{background:#1f4e79;color:#fff}.success{background:#137333;color:#fff}.ghost{background:#edf1f6;color:#233}
+.notice{background:#eef5ff;border:1px solid #cfe1ff;padding:12px 14px;border-radius:10px;color:#24496c;margin:16px 0;font-size:13px}
+.cols{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.cols span{background:#f7f9fc;border:1px solid var(--line);border-radius:999px;padding:6px 9px;font-size:11px;font-weight:700}
+#status{margin-top:13px;font-size:13px;color:var(--muted)}
+@media(max-width:760px){.summary{grid-template-columns:1fr 1fr}.title{display:block}.actions>*{width:100%}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <b>FOLLOW UP CR-7 • DOWNLOAD EXCEL</b>
+  <small>Sinkron langsung dengan data Follow Up CR-7 di browser ini</small>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <div class="title">
+      <div>
+        <h2>Download Semua Data CR-7</h2>
+        <div class="muted">Semua data yang sudah maupun belum follow up akan ikut ter-download. Reason, status follow up, booking dan tanggal follow up ikut dibawa.</div>
+      </div>
+      <button class="ghost" onclick="refreshData()">↻ Refresh</button>
+    </div>
+
+    <div class="summary">
+      <div class="kpi"><span>TOTAL DATA</span><strong id="kTotal">0</strong></div>
+      <div class="kpi"><span>SUDAH FOLLOW UP</span><strong id="kSudah">0</strong></div>
+      <div class="kpi"><span>BELUM FOLLOW UP</span><strong id="kBelum">0</strong></div>
+      <div class="kpi"><span>BOOKING</span><strong id="kBooking">0</strong></div>
+    </div>
+
+    <div class="notice">
+      Data dibaca langsung dari database CR-7 yang sama, yaitu <b>cr7_v2_data</b>.
+      Halaman ini tidak menghapus atau mengubah data Follow Up.
+    </div>
+
+    <b>Kolom hasil download:</b>
+    <div class="cols">
+      <span>UPLOAD_DATE</span><span>BATCH_NAME</span><span>SOURCE_FILE</span>
+      <span>CATEGORY</span><span>SERVICE_ADVISOR</span><span>POLICE_NO</span>
+      <span>VIN_NO_RANGKA</span><span>CUSTOMER</span><span>TELEPHONE</span>
+      <span>SARAN_PERBAIKAN</span><span>ESTIMASI</span><span>SERVICE_ORDER</span>
+      <span>REPAIR_DATE</span><span>KONDISI_BAN</span><span>KONDISI_AKI</span>
+      <span>STATUS_FOLLOW_UP</span><span>REASON_FOLLOW_UP</span>
+      <span>CATATAN</span><span>BOOKING</span><span>TANGGAL_FOLLOW_UP</span>
+    </div>
+
+    <div class="actions">
+      <button id="btnExcel" class="success" onclick="downloadExcel()">⬇ Download Semua Data Excel (.xlsx)</button>
+      <button class="ghost" onclick="downloadCsv()">Download CSV Cadangan</button>
+      <a class="btn primary" href="./index.html">← Kembali ke CR-7</a>
+    </div>
+    <div id="status">Membaca data...</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+const K_DATA='cr7_v2_data';
+let rows=[];
+
+function norm(s){return String(s??'').trim()}
+function readRows(){
+  try{
+    const data=JSON.parse(localStorage.getItem(K_DATA)||'[]');
+    return Array.isArray(data)?data:[];
+  }catch(e){
+    console.error(e); return [];
+  }
+}
+function isBelum(r){
+  const s=norm(r.statusFU);
+  return !s || s.toLowerCase()==='belum fu';
+}
+function isBooking(r){
+  return norm(r.statusFU).toLowerCase().includes('booking') ||
+         norm(r.booking).toLowerCase().includes('booking');
+}
+function fmtFollowDate(v){
+  if(!v)return '';
+  const d=new Date(v);
+  if(isNaN(d))return String(v);
+  const p=n=>String(n).padStart(2,'0');
+  return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function refreshData(){
+  rows=readRows();
+  const total=rows.length;
+  const belum=rows.filter(isBelum).length;
+  const sudah=total-belum;
+  const booking=rows.filter(isBooking).length;
+  kTotal.textContent=total;
+  kSudah.textContent=sudah;
+  kBelum.textContent=belum;
+  kBooking.textContent=booking;
+  btnExcel.disabled=!total;
+  status.textContent=total
+    ? `Sinkron: ${total} data terbaca dari Follow Up CR-7 (${sudah} sudah FU, ${belum} belum FU).`
+    : 'Belum ada data CR-7 yang terbaca pada browser/domain ini.';
+}
+function exportRows(){
+  rows=readRows();
+  return rows.map((r,i)=>({
+    NO:i+1,
+    UPLOAD_DATE:r.uploadDate||'',
+    BATCH_NAME:r.batchName||'',
+    SOURCE_FILE:r.sourceFile||'',
+    PRIORITAS:priority(r.category),
+    CATEGORY:r.category||'',
+    SERVICE_ADVISOR:r.sa||'',
+    POLICE_NO:r.plat||'',
+    VIN_NO_RANGKA:r.vin||'',
+    CUSTOMER:r.customer||'',
+    TELEPHONE:r.phone||'',
+    SARAN_PERBAIKAN:r.detailJob||'',
+    ESTIMASI:Number(r.estimasi)||0,
+    SERVICE_ORDER:r.serviceOrder||'',
+    REPAIR_DATE:r.repairDate||'',
+    KONDISI_BAN:r.kondisiBan||'',
+    KONDISI_AKI:r.kondisiAki||'',
+    STATUS_FOLLOW_UP:r.statusFU||'Belum FU',
+    REASON_FOLLOW_UP:r.reason||r.note||'',
+    CATATAN:r.note||'',
+    BOOKING:r.booking||'',
+    TANGGAL_FOLLOW_UP:fmtFollowDate(r.lastFU)
+  }));
+}
+function priority(c){
+  c=norm(c).toLowerCase();
+  if(c.includes('safety'))return '1 - SAFETY';
+  if(c.includes('urgent'))return '2 - URGENT';
+  if(c.includes('efficient'))return '3 - EFFICIENT';
+  return '4 - COMFORTABLE';
+}
+function filename(ext){
+  const d=new Date(),p=n=>String(n).padStart(2,'0');
+  return `HASIL_FOLLOW_UP_CR7_${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}.${ext}`;
+}
+function downloadExcel(){
+  const data=exportRows();
+  if(!data.length){alert('Belum ada data CR-7 untuk di-download.');return}
+  if(typeof XLSX==='undefined'){
+    alert('Library Excel belum termuat. Gunakan tombol CSV Cadangan atau refresh halaman.');
+    return;
+  }
+  const ws=XLSX.utils.json_to_sheet(data);
+  if(ws['!ref']){
+    const range=XLSX.utils.decode_range(ws['!ref']);
+    ws['!autofilter']={ref:XLSX.utils.encode_range({s:{r:0,c:0},e:{r:range.e.r,c:range.e.c}})};
+  }
+  ws['!cols']=[
+    {wch:6},{wch:14},{wch:24},{wch:24},{wch:16},{wch:16},{wch:18},{wch:16},
+    {wch:24},{wch:28},{wch:18},{wch:45},{wch:16},{wch:18},{wch:16},{wch:18},
+    {wch:18},{wch:20},{wch:28},{wch:28},{wch:22},{wch:22}
+  ];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'HASIL FOLLOW UP CR7');
+  XLSX.writeFile(wb,filename('xlsx'));
+  status.textContent=`Download Excel berhasil: ${data.length} data.`;
+}
+function csvEscape(v){
+  const s=String(v??'');
+  return /[",\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;
+}
+function downloadCsv(){
+  const data=exportRows();
+  if(!data.length){alert('Belum ada data CR-7 untuk di-download.');return}
+  const headers=Object.keys(data[0]);
+  const csv='\ufeff'+[headers.join(','),...data.map(r=>headers.map(h=>csvEscape(r[h])).join(','))].join('\r\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download=filename('csv');
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  status.textContent=`Download CSV berhasil: ${data.length} data.`;
+}
+window.addEventListener('storage',e=>{if(e.key===K_DATA)refreshData()});
+window.addEventListener('pageshow',refreshData);
+refreshData();
+</script>
+</body>
+</html>
